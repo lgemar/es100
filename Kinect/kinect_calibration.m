@@ -8,6 +8,7 @@ x_vs_time = zeros(1, N);
 colorVid = videoinput('kinect',1); 
 depthVid = videoinput('kinect',2);
 
+%% Set Kinect Properties
 % Set the triggering mode to 'manual'
 triggerconfig([colorVid depthVid],'manual');
 colorVid.FramesPerTrigger = 1;
@@ -63,10 +64,10 @@ for i = 1:N
     height = bbox(4); 
     
     % Draw the bounding box around the region
-    J = step(shapeInserter, rgb_frame, int32(bbox'));
-    figure(picfig)
-    imshow(J)
-    drawnow limitrate;
+%     J = step(shapeInserter, rgb_frame, int32(bbox'));
+%     figure(picfig)
+%     imshow(J)
+%     drawnow limitrate;
     
     % Compute the average depth of the pixels
     c = [x x (x+width) (x+width)]; 
@@ -74,18 +75,21 @@ for i = 1:N
     x_vs_time(i) = x;
     y_vs_time(i) = y; 
     BW = roipoly(rgb_frame,c,r);
-    idx = find(BW);
-    depth_vs_time(i) = mean(depth_frame(idx)); 
-	
+    roi = depth_frame(BW); 
+    pixels_of_interest = roi(roi > 100); 
+    depth_vs_time(i) = mean(pixels_of_interest); 
+    
 	% Plot the results
 	set(dax, 'Xdata', t, 'Ydata', depth_vs_time(1:i));
     drawnow limitrate;
 end
 
+%% 
 stop([colorVid depthVid]);
 
+%% 
 % Clear up the workspace
-delete(vid)
-delete(vid2)
-clear vid
-clear vid2
+delete(colorVid)
+delete(depthVid)
+clear colorVid
+clear depthVid

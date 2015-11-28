@@ -1,7 +1,7 @@
 %% Close, clear, and set up for acquisition
 clear all;
 acqSize = 500;
-com_port = 'COM5'; 
+com_port = 'COM3'; 
 
 %% Open the serial port
 A = Accelerometer(com_port); 
@@ -54,7 +54,7 @@ disp('Finishing acquisition...')
 disp(['Sample rate: ', num2str(length(t)/max(t))])
 disp('Cleaning up...')
     
-% Clean up the serial port from the workspace
+%% Clean up the serial port from the workspace
 A.close(); 
 A.delete(); 
 clear A

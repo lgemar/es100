@@ -1,10 +1,9 @@
 %% Close, clear, and set up for acquisition
 clear all;
-acqSize = 10000;
-com_port = 'COM5'; 
+acqSize = 1000; 
 
 %% Open the serial port
-com_port = 'COM5'; 
+com_port = 'COM3'; 
 baud_rate = 250000; 
 s = serial(com_port, 'BaudRate', baud_rate);
 s.InputBufferSize = 2048; 
@@ -25,24 +24,23 @@ t = zeros(1, acqSize);
 counter = 0; 
 disp('Starting acquisition...')
 t0 = tic;
-while(counter<=acqSize)
+while(i<=acqSize)
     if(i>1)
         t(i)=toc(t0);
     end
 
     % Get the data
-    [D, count, msg] = fread(s, 1024, 'int16');
+    [D, count, msg] = fread(s, 9, 'int16');
 
 	% Get the data from the sampler
-    % Acc(1:3,i:(i+count-1)) = D(2:4)';
-    % GyroRate(1:3,(i+count-1)) = D(5:7)';  
-    % Magn(1:3,(i+count-1)) = D(8:10)';
+    Acc(1:3,i) = D(1:3)';
+    GyroRate(1:3,i) = D(4:6)';
+    Magn(1:3,i) = D(7:9)';
     
-    i=i+1;
-    counter = counter + count; 
+    i=i+1; 
 end
 disp('Finishing acquisition...')
-disp(['Sample rate: ', num2str(counter/max(t))])
+disp(['Sample rate: ', num2str(length(t)/max(t))])
 disp('Cleaning up...')
     
 %% Clean up the serial port from the workspace

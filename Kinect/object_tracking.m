@@ -42,11 +42,18 @@ disp('Computing the position vs time...');
 [x, y, d] = positionVsTime(depth_frames, rgb_frames, tracker); 
 
 %% Plot the data
-% disp('Plotting the data...'); 
-% figure(1) 
-% plot(d); title('Depth vs time'); xlabel('Sample number'); ylabel('Pixel depth'); 
+disp('Plotting the data...'); 
+figure(1) 
+plot(d); title('Depth vs time'); xlabel('Sample number'); ylabel('Pixel depth'); 
 
 %% Compute the mean and the variance of the depth data
-format long
-m = mean(d)
-s = std(d) 
+% format long
+% m = mean(d); 
+% s = std(d); 
+
+%% Compute the average x,y,z position for centroid calculations
+xavg = mean(x); 
+yavg = mean(y);
+davg = mean(d); 
+
+centroid = [xavg, davg, yavg]

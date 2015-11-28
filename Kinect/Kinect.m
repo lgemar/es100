@@ -6,15 +6,23 @@ classdef Kinect
    end
    methods
       function K = Kinect()
-        colorVid = videoinput('kinect',1); 
-        depthVid = videoinput('kinect',2);
+        K.colorVid = videoinput('kinect',1); 
+        K.depthVid = videoinput('kinect',2);
       end
 
-      function aquire(K, NUM_FRAMES)
+      function startAcq(K, NUM_FRAMES)
+        % Set the acquisition properties
         colorVid.FramesPerTrigger = NUM_FRAMES;
         depthVid.FramesPerTrigger = NUM_FRAMES;
-        triggerconfig([colorVid depthVid],'manual');
-        start([colorVid depthVid]);
+
+        % Configure the trigger for recording purposes
+        triggerconfig([K.colorVid K.depthVid],'manual');
+
+        % Start the color and depth device. 
+        start([K.colorVid K.depthVid]);
+
+        % Trigger the devices to start logging of data.
+        trigger([K.colorVid K.depthVid]);
       end
 
       function [rgb_frames, depth_frames] = getFrames(K, NUM_FRAMES)
@@ -25,8 +33,8 @@ classdef Kinect
         [depth_frames, ts2, depth_metaData] = getdata(depthVid, NUM_FRAMES);
       end
 
-      function stopAcquisition(K)
-        stop([colorVid depthVid]);
+      function stopAcq(K)
+        stop([K.colorVid K.depthVid]);
       end
    end
 end

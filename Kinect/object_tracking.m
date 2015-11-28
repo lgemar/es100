@@ -1,22 +1,11 @@
 %% Load the video objects
 clear all
-colorVid = videoinput('kinect',1); 
-depthVid = videoinput('kinect',2);
+K = Kinect(); 
 
-%% Set Kinect Properties
+%% Record video with the Kinect
 disp('Setting acquisition properties...')
-NUM_FRAMES = 100; 
-colorVid.FramesPerTrigger = NUM_FRAMES;
-depthVid.FramesPerTrigger = NUM_FRAMES;
-triggerconfig([colorVid depthVid],'manual');
-
-%% Start the color and depth device. 
 disp('Starting the Kinect...')
-% This begins acquisition, but does not start logging of acquired data.
-start([colorVid depthVid]);
-
-% Trigger the devices to start logging of data.
-trigger([colorVid depthVid]);
+K.startAcq(100);
 
 %% Acquire the video into memory
 disp('Acquiring the data into memory...'); 

@@ -1,20 +1,17 @@
 %% Load the video objects
-clear all
 K = Kinect(); 
 
 %% Record video with the Kinect
 disp('Setting acquisition properties...')
+NUM_FRAMES = 100; 
 disp('Starting the Kinect...')
-K.startAcq(100);
+K.startAcq(NUM_FRAMES);
 
 %% Acquire the video into memory
 disp('Acquiring the data into memory...'); 
-while(colorVid.FramesAcquired ~= NUM_FRAMES || depthVid.FramesAcquired ~= NUM_FRAMES)
-    pause(.1); 
-end
-[rgb_frames, ts1, rgb_metaData] = getdata(colorVid, NUM_FRAMES);
-[depth_frames, ts2, depth_metaData] = getdata(depthVid, NUM_FRAMES);
-stop([colorVid depthVid]);
+[rgb_frames, depth_frames] = K.getFrames(NUM_FRAMES);
+
+K.stopAcq();
 
 %% Set up the object tracker
 disp('Setting up the object tracker...')

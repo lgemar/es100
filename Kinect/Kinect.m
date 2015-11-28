@@ -12,8 +12,8 @@ classdef Kinect
 
       function startAcq(K, NUM_FRAMES)
         % Set the acquisition properties
-        colorVid.FramesPerTrigger = NUM_FRAMES;
-        depthVid.FramesPerTrigger = NUM_FRAMES;
+        K.colorVid.FramesPerTrigger = NUM_FRAMES;
+        K.depthVid.FramesPerTrigger = NUM_FRAMES;
 
         % Configure the trigger for recording purposes
         triggerconfig([K.colorVid K.depthVid],'manual');
@@ -26,11 +26,11 @@ classdef Kinect
       end
 
       function [rgb_frames, depth_frames] = getFrames(K, NUM_FRAMES)
-        while(colorVid.FramesAcquired ~= NUM_FRAMES || depthVid.FramesAcquired ~= NUM_FRAMES)
+        while(K.colorVid.FramesAcquired ~= NUM_FRAMES || K.depthVid.FramesAcquired ~= NUM_FRAMES)
             pause(.1); 
         end
-        [rgb_frames, ts1, rgb_metaData] = getdata(colorVid, NUM_FRAMES);
-        [depth_frames, ts2, depth_metaData] = getdata(depthVid, NUM_FRAMES);
+        [rgb_frames, ts1, rgb_metaData] = getdata(K.colorVid, NUM_FRAMES);
+        [depth_frames, ts2, depth_metaData] = getdata(K.depthVid, NUM_FRAMES);
       end
 
       function stopAcq(K)

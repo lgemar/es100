@@ -28,14 +28,8 @@ end
 stop([colorVid depthVid]);
 
 %% Set up the object tracker
-rgb_frame = rgb_frames(:, :, :, 1); 
 disp('Setting up the object tracker...')
-hsv_image = rgb2hsv(rgb_frame); 
-shapeInserter = vision.ShapeInserter('BorderColor','Custom','CustomBorderColor',[1 0 0]);
-tracker = vision.HistogramBasedTracker;
-picfig = figure; imshow(rgb_frame); title('Bounding Box');
-objectRegion=round(getPosition(imrect));
-initializeObject(tracker, hsv_image(:, :, 1), objectRegion)
+tracker = initializeTracker(rgb_frames(:, :, :, 1));
 
 %% Compute the position vs time
 disp('Computing the position vs time...'); 

@@ -6,6 +6,32 @@
 //     2011-10-07 - initial release
 //     2013-1-4 - added raw magnetometer output
 
+/* Potential bottlenecks: 
+ *  IMU configuration
+ *    - occurs in registers (usually 8 bit R/W quantities)
+ *    - Check registration data description FIFO Enable, I2C Master Control, Default registers
+ *      - I2C Master : sets things up
+ *      - FIFO Enable : Configures what data is stored in this buffer? Easy to stream to 
+ *                      with output buffer
+ *    - clock source
+ *    - power mode
+ *  I2C configuration - Wire.h library
+ *    - clock speed
+ *  Uart Serial  
+ *  Tools
+ *    - millis command returns 
+ *    - #define (or const uint8) MCU_9150_PM_REG0 B110101101
+ *  Proccess  
+ *    (1) Throw some data - see if it speeds up - that's the problem! 
+ *    (2) Increase baud rate
+ *    (3) I2C Configuration (Wire.h) clock speed
+ *    (4) IMU Configuration 
+ *      4a clock source
+ *      4b power mode
+ *      4c FIFO configuration
+ *      4c write your own setup function? 
+ */
+
 /* ============================================
 I2Cdev device library code is placed under the MIT license
 
@@ -49,6 +75,7 @@ int16_t gx, gy, gz;
 int16_t mx, my, mz;
 
 #define LED_PIN 13
+#define TEST_PIN 7
 bool blinkState = false;
 
 void setup() {
@@ -70,33 +97,35 @@ void setup() {
 
     // configure Arduino LED for
     pinMode(LED_PIN, OUTPUT);
+    pinMode(TEST_PIN, OUTPUT);
 }
 
 void loop() {
     // read raw accel/gyro measurements from device
-    accelgyro.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
+    //accelgyro.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
 
     // these methods (and a few others) are also available
-    //accelgyro.getAcceleration(&ax, &ay, &az);
-    //accelgyro.getRotation(&gx, &gy, &gz);
+    accelgyro.getAcceleration(&ax, &ay, &az); //try and see if it's faster
+    accelgyro.getRotation(&gx, &gy, &gz);
 
     // display tab-separated accel/gyro x/y/z values
     // int16_t i = 8; 
     // Serial.write(i); Serial.write(i << 8); 
 
-    Serial.write(ax); Serial.write(ax << 8); 
+    Serial.write(ax); Serial.write(ax << 8); // Serial.write with the buffer argument, with array
     Serial.write(ay); Serial.write(ay << 8); 
     Serial.write(az); Serial.write(az << 8); 
     Serial.write(gx); Serial.write(gx << 8); 
     Serial.write(gy); Serial.write(gy << 8); 
     Serial.write(gz); Serial.write(gz << 8); 
-    Serial.write(mx); Serial.write(mx << 8); 
-    Serial.write(my); Serial.write(my << 8); 
-    Serial.write(mz); Serial.write(mz << 8); 
+    //Serial.write(mx); Serial.write(mx << 8); 
+    //Serial.write(my); Serial.write(my << 8); 
+    //Serial.write(mz); Serial.write(mz << 8); 
 
     // Serial.write(i); Serial.write(i << 8); 
 
     // blink LED to indicate activity
-    // blinkState = !blinkState;
-    // digitalWrite(LED_PIN, blinkState);
+    blinkState = !blinkState;
+    digitalWrite(LED_PIN, blinkState);
+    digitalWrite(TEST_PIN, blinkState); // See how fast the arduino is toggling
 }

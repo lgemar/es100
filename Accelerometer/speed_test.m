@@ -3,19 +3,17 @@ clear all;
 acqSize = 1000; 
 
 %% Open the serial port
-com_port = 'COM3'; 
+com_port = 'COM6'; 
 baud_rate = 250000; 
 s = serial(com_port, 'BaudRate', baud_rate);
 s.InputBufferSize = 2048; 
 fopen(s); 
-
 
 %% Set up the filters and parameters for acquisition
 i=1;
 dt=0;
 GyroRate=zeros(3,acqSize);
 Acc=zeros(3,acqSize);
-Magn=zeros(3,acqSize);
 t = zeros(1, acqSize);
 
 %% Do the acquisition
@@ -30,12 +28,11 @@ while(i<=acqSize)
     end
 
     % Get the data
-    [D, count, msg] = fread(s, 9, 'int16');
+    [D, count, msg] = fread(s, 6, 'int16');
 
 	% Get the data from the sampler
     Acc(1:3,i) = D(1:3)';
     GyroRate(1:3,i) = D(4:6)';
-    Magn(1:3,i) = D(7:9)';
     
     i=i+1; 
 end

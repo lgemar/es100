@@ -1,5 +1,5 @@
 %% Variables of interest
-N = 1000; 
+N = 100; 
 
 % Acquire data into memory before logging it
 colorVid = videoinput('kinect',1); 
@@ -9,6 +9,15 @@ depthVid = videoinput('kinect',2);
 set([colorVid depthVid], 'FramesPerTrigger', 1);
 set([colorVid depthVid], 'TriggerRepeat', Inf);
 triggerconfig([colorVid depthVid], 'manual');
+
+%% Set up accelerometer variables
+addpath('..\Accelerometer')
+com_port = 'COM8'; 
+acqSize = 10000; 
+GyroRate=zeros(3,acqSize);
+Acc=zeros(3,acqSize);
+A = Accelerometer(com_port); 
+A = A.calibrate();
 
 %% Start the color and depth device. This begins acquisition, but does not
 % start logging of acquired data.
@@ -26,21 +35,21 @@ tracker = initializeTracker(rgb_image);
 
 %%
 t0 = tic; 
-t = 0;
-ttrig = 0; 
-while(1)
-    % Extend the time array
-	if(i > 1)
-        t = [t toc(t0)];
-        if( (ttrig - t(end)) > 1 )
-            trigger([colorVid depthVid]); 
-            % Get the data
-            rgb_frame = getdata(colorVid); depth_frame = getdata(depthVid);
-            % Find the bounding box for the selected object
-            [x1, x2, x3] = findPosition(rgb_frame, depth_frame, tracker); 
-            toc(t0)
-        end
+t = 0; ttrig = 0; i = 0; 
+while(i <= N)
+% Extend the time array
+    t = [t toc(t0)];
+    if( (t(end) - ttrig) > 0.5 )
+        trigger([colorVid depthVid]); i = i+1; 
+        ttrig = t(end); 
+        % Get the data
+        rgb_frame = getdata(colorVid); depth_frame = getdata(depthVid);
+        % Find the bounding box for the selected object
+        [x1, x2, x3] = findPosition(rgb_frame, depth_frame, tracker); 
+        toc(t0)
     end
+    % Get the data
+    D = A.getDataSample();
 end
 
 %% 

@@ -12,10 +12,10 @@ classdef Accelerometer
    end
    methods
       function A = Accelerometer(com_port)
-         A.BaudRate = 74880;
+         A.BaudRate = 250000;
          A.ComPort = com_port; 
          A.SerialPort = serial(A.ComPort, 'BaudRate', A.BaudRate);
-         A.FormatString=['a/g/m:\t','%d\t','%d\t','%d\t','%d\t','%d\t','%d\t','%d\t','%d\t','%d\n'];
+         A.FormatString=['a/g/m:\t','%d\t','%d\t','%d\t','%d\t','%d\t','%d\n'];
 	 fopen(A.SerialPort); 
       end
 
@@ -39,19 +39,19 @@ classdef Accelerometer
 
             % Make sure to read a valid data sample with all 9 fields
             data = fscanf(A.SerialPort, A.FormatString);
-            while( size(data) ~= 9 )
+            while( size(data) ~= 6 )
                     data = fscanf(A.SerialPort, A.FormatString);
             end
 
             % Adjust the data according to the sensitivity of the sensor
             accel = (4*9.81) * data(1:3) / (2^16);
             gyro = (2*250) * data(4:6) / (2^16);  
-            magnet = (2*1200) * data(7:9) / (2^16);
+            % magnet = (2*1200) * data(7:9) / (2^16);
 
             % Store for later
             Acc(1:3,i) = accel';
             GyroRate(1:3,i) = gyro';
-            Magn(1:3,i) = magnet';
+            % Magn(1:3,i) = magnet';
             
             i=i+1;
         end
@@ -63,12 +63,12 @@ classdef Accelerometer
 
       function s = getDataSample(A)
         % Allocate the output
-        s = zeros(1, 9);
-        formatspec  = ['a/g/m:\t' '%d\t' '%d\t' '%d\t' '%d\t' '%d\t' '%d\t' '%d\t' '%d\t' '%d\n']; 
+        s = zeros(1, 6);
+        formatspec  = ['a/g/m:\t' '%d\t' '%d\t' '%d\t' '%d\t' '%d\t' '%d\n']; 
 
         % Make sure to read a valid data sample with all 9 fields
         data = fscanf(A.SerialPort, A.FormatString);
-        while( size(data) ~= 9 )
+        while( size(data) ~= 6 )
                 data = fscanf(A.SerialPort, A.FormatString);
         end
 
@@ -81,12 +81,12 @@ classdef Accelerometer
         gyro_calib = gyro - A.GyroBias;
 
         % Read in and adjust the magnetometer readings
-        magn = (2*1200) * data(7:9) / (2^16);
-        magn_calib = magn;
+        % magn = (2*1200) * data(7:9) / (2^16);
+        % magn_calib = magn;
 
         s(1:3) = accel_calib; 
         s(4:6) = gyro_calib; 
-        s(7:9) = magn_calib;
+        % s(7:9) = magn_calib;
       end
 
       function close(A)

@@ -49,6 +49,7 @@ int16_t gx, gy, gz;
 int16_t mx, my, mz;
 
 #define LED_PIN 13
+#define TEST_PIN 7
 bool blinkState = false;
 
 void setup() {
@@ -58,7 +59,7 @@ void setup() {
     // initialize serial communication
     // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
     // it's really up to you depending on your project)
-    Serial.begin(74880);
+    Serial.begin(250000);
 
     // initialize device
     Serial.println("Initializing I2C devices...");
@@ -74,11 +75,11 @@ void setup() {
 
 void loop() {
     // read raw accel/gyro measurements from device
-    accelgyro.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
+    //accelgyro.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
 
     // these methods (and a few others) are also available
-    //accelgyro.getAcceleration(&ax, &ay, &az);
-    //accelgyro.getRotation(&gx, &gy, &gz);
+    accelgyro.getAcceleration(&ax, &ay, &az);
+    accelgyro.getRotation(&gx, &gy, &gz);
 
     // display tab-separated accel/gyro x/y/z values
     Serial.print("a/g/m:\t");
@@ -87,12 +88,13 @@ void loop() {
     Serial.print(az); Serial.print("\t");
     Serial.print(gx); Serial.print("\t");
     Serial.print(gy); Serial.print("\t");
-    Serial.print(gz); Serial.print("\t");
-    Serial.print(mx); Serial.print("\t");
-    Serial.print(my); Serial.print("\t");
-    Serial.println(mz);
+    Serial.println(gz);
+    //Serial.print(mx); Serial.print("\t");
+    //Serial.print(my); Serial.print("\t");
+    //Serial.println(mz);
 
     // blink LED to indicate activity
     blinkState = !blinkState;
     digitalWrite(LED_PIN, blinkState);
+    digitalWrite(TEST_PIN, blinkState);
 }

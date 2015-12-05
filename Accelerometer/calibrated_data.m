@@ -1,7 +1,7 @@
 %% Close, clear, and set up for acquisition
 clear all;
-acqSize = 500;
-com_port = 'COM3'; 
+acqSize = 2000;
+com_port = 'COM6'; 
 
 %% Open the serial port
 A = Accelerometer(com_port); 
@@ -12,26 +12,20 @@ i=1;
 dt=0;
 GyroRate=zeros(3,acqSize);
 Acc=zeros(3,acqSize);
-Magn=zeros(3,acqSize);
 t = zeros(1, acqSize);
 
 %% Do the acquisition
 h1 = figure(1); 
 
 % Accelerometer Data
-subplot(3, 1, 1); ax = line(nan, nan, 'Color', 'r'); ay = line(nan, nan, 'Color', 'g'); az = line(nan, nan, 'Color', 'b');
+subplot(2, 1, 1); ax = line(nan, nan, 'Color', 'r'); ay = line(nan, nan, 'Color', 'g'); az = line(nan, nan, 'Color', 'b');
 legend('X-axis', 'Y-axis', 'Z-axis')
 title('Accelerometer calibrated output'); xlabel('s'); ylabel('m/s^2'); 
 
 % Gyroscope Data
-subplot(3, 1, 2); gx = line(nan, nan, 'Color', 'r'); gy = line(nan, nan, 'Color', 'g'); gz = line(nan, nan, 'Color', 'b');
+subplot(2, 1, 2); gx = line(nan, nan, 'Color', 'r'); gy = line(nan, nan, 'Color', 'g'); gz = line(nan, nan, 'Color', 'b');
 legend('X-axis', 'Y-axis', 'Z-axis')
 title('Gyroscope calibrated output'); xlabel('s'); ylabel('degress/s'); 
-
-% Magnetometer Data
-subplot(3, 1, 3); mx = line(nan, nan, 'Color', 'r'); my = line(nan, nan, 'Color', 'g'); mz = line(nan, nan, 'Color', 'b');
-legend('X-axis', 'Y-axis', 'Z-axis')
-title('Magnetometer calibrated output'); xlabel('s'); ylabel('uT'); 
 
 disp('Starting acquisition...')
 t0 = tic;
@@ -46,7 +40,6 @@ while(i<=acqSize)
 	% Get the data from the sampler
     Acc(1:3,i) = D(1:3)';
     GyroRate(1:3,i) = D(4:6)';
-    Magn(1:3,i) = D(7:9)';
     
     i=i+1;
 end
@@ -69,8 +62,3 @@ set(az, 'XData', t(1:i), 'YData', Acc(3,1:i));
 set(gx, 'XData', t(1:i), 'YData', GyroRate(1,1:i));
 set(gy, 'XData', t(1:i), 'YData', GyroRate(2,1:i));
 set(gz, 'XData', t(1:i), 'YData', GyroRate(3,1:i));
-
-% Set the magnetometer data in real time
-set(mx, 'XData', t(1:i), 'YData', Magn(1,1:i));
-set(my, 'XData', t(1:i), 'YData', Magn(2,1:i));
-set(mz, 'XData', t(1:i), 'YData', Magn(3,1:i));

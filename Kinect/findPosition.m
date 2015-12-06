@@ -17,6 +17,6 @@ roi = depth_frame(BW);
 pixels_of_interest = roi(roi > 100); 
 
 % Compute the coordinates of the object in pixels
-x = (x_box + width) / 2;
-y = (y_box + height) / 2; 
+x = (x_box + (x_box + width)) / 2;
+y = (y_box + (y_box + height)) / 2; 
 d = mean(pixels_of_interest); 

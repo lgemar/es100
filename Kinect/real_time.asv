@@ -168,12 +168,12 @@ xlabel('x position (cm)')
 ylabel('z position (cm)')
 
 %% Compute the error of the Kinect values
-err = zeros(1,size(KnctDataTransf,2)); 
+Kncterr = zeros(1,size(KnctDataTransf,2)); 
 for i = 1:size(KnctDataTransf,2)
     P = KnctDataTransf(1:2,1)'; 
-    err(i) = spatialError(trajectory,P); 
+    Kncterr(i) = spatialError(trajectory,P); 
 end
-
+mae = mean(Kncterr);
 
 %% Transform the accelerometer data
 window_size = 1;
@@ -207,7 +207,57 @@ title('Filtered Accelerometer Data (Z)')
 xlabel('time (s)')
 ylabel('distance (m)')
 
+%% Compute the absolute error of the accelerometers values vs. time
+Accerr = zeros(1,size(AccFiltPos,2)); 
+for i = 1:size(AccFiltPos,2)
+    P = AccFiltPos(1:2,i)'; 
+    Accerr(i) = spatialError(trajectory,P); 
+end
+figure;
+plot(tAcc,100 * Accerr)
+title('Absolute spatial error vs time')
+xlabel('time (s)')
+ylabel('Absolute error (cm)') 
 
+%% Compute the abosolute error of the combined data streams
+% Create a new data stream with drift correction
+KnctVelx = diff(KnctDataTransf(1,:)) ./ tKnct(2:end); 
+KnctVely = diff(KnctDataTransf(2,:)) ./ tKnct(2:end); 
+KnctVelz = diff(KnctDataTransf(3,:)) ./ tKnct(2:end); 
+KnctVel = [KnctVelx;KnctVely;KnctVelz];
+
+%% Create an observer system
+% Simulate the system
+dt = Tsa; 
+A = [eye(3),dt*eye(3); zeros(3), eye(3)]; 
+B = [zeros(3); dt*eye(3)]; 
+C = [eye(3), zeros(3)];
+D = 0; 
+sys = ss(A,B,C,D,dt); 
+% y = lsim(sys,AccData',[],zeros(6,1));
+
+% Compute the predicted values using ss model
+state_estimate = zeros(6,1); 
+PredictData = zeros(size(AccData)); 
+j = 1; 
+for k = 1:size(AccData,2)
+    if(tKnct(j) < tAcc(k))
+        if( j == 1)
+            state_estimate(1:3) = KnctDataTransf(:,j);
+        else
+            state_estimate(1:3) = KnctDataTransf(:,j);
+            state_estimate(4:6) = (KnctDataTransf(:,j) - KnctDataTransf(:,j-1))/(tKnct(j) - tKnct(j-1)); 
+        end
+        j = min(size(KnctDataTransf,2),j + 1); 
+    end
+    state_estimate = A * state_estimate + B * AccData(:,k); 
+    PredictData(:,k) = C * state_estimate; 
+end
+
+figure;
+title('Sensor fusion 
+c = linspace(1,10,size(AccData,2)); 
+scatter(100*PredictData(1,:),100*PredictData(2,:),[],c)
 
 %% Deinialize
 disp('Cleaning up...')

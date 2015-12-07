@@ -57,7 +57,7 @@ classdef Accelerometer
         end
 
         % Set the biases on the data
-        A.AccelBias = mean(Acc, 2) + 9.81 * [0; 0; -1]; 
+        A.AccelBias = mean(Acc, 2);
         A.GyroBias = mean(GyroRate, 2); 
       end
 
@@ -74,7 +74,7 @@ classdef Accelerometer
 
         % Read in and adjust the accelerometer readings
         accel = (4*9.81) * data(1:3) / (2^16);
-        accel_calib = accel - A.AccelBias;
+        accel_calib = -A.AccelBias + accel;
 
         % Read in and adjust the gyroscope data
         gyro = (2*250) * data(4:6) / (2^16);  

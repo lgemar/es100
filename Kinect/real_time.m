@@ -112,15 +112,9 @@ xlim([700 2000])
 ylim([0 480])
 
 %% Visualize the raw accelerometer data
-AccVelx = cumtrapz(tAcc,AccData(1,:));
-AccVely = cumtrapz(tAcc,AccData(2,:));
-AccVelz = cumtrapz(tAcc,9.81 - AccData(3,:));
-AccVel = [AccVelx;AccVely;AccVelz];
+AccVel = integrate3D(tAcc,AccData); 
 
-AccPosx = cumtrapz(tAcc,AccVel(1,:));
-AccPosy = cumtrapz(tAcc,AccVel(2,:));
-AccPosz = cumtrapz(tAcc,AccVel(3,:));
-AccPos = [AccPosx;AccPosy;AccPosz];
+AccPos = integrate3D(tAcc,AccVel);
 
 figure; 
 subplot(1,3,1)
@@ -146,6 +140,36 @@ scatter(AccPos(1,:),AccPos(3,:),[], c)
 %% Transform the kinect data
 
 %% Transform the accelerometer data
+window_size = 50;
+acc_filter = ones(window_size,1) * 1/window_size; 
+AccFiltData = [];
+for i = 1:length(tAcc)
+    if(i < window_size)
+        AccFiltData = [AccFiltData, AccData(:,1:i) * acc_filter(1:i)];
+    else
+        AccFiltData = [AccFiltData, AccData(:,(i - window_size + 1):i) * acc_filter];
+    end
+end
+
+AccFiltVel = integrate3D(tAcc,AccFiltData);
+AccFiltPos = integrate3D(tAcc,AccFiltVel);
+
+figure; 
+subplot(1,3,1)
+plot(tAcc,AccFiltData(1,:),'r',tAcc,AccFiltVel(1,:),'g',tAcc,AccFiltPos(1,:),'b')
+title('Filtered Accelerometer Data (X)')
+xlabel('time (s)')
+ylabel('distance (m)')
+subplot(1,3,2)
+plot(tAcc,AccFiltData(2,:),'r',tAcc,AccFiltVel(2,:),'g',tAcc,AccFiltPos(2,:),'b')
+title('Filtered Accelerometer Data (Y)')
+xlabel('time (s)')
+ylabel('distance (m)')
+subplot(1,3,3)
+plot(tAcc,AccFiltData(3,:),'r',tAcc,AccFiltVel(3,:),'g',tAcc,AccFiltPos(3,:),'b')
+title('Filtered Accelerometer Data (Z)')
+xlabel('time (s)')
+ylabel('distance (m)')
 
 
 

@@ -243,10 +243,11 @@ j = 1;
 for k = 1:size(AccData,2)
     if(tKnct(j) < tAcc(k))
         if( j == 1)
-            state_estimate(1:3) = KnctDataTransf(:,j);
+            state_estimate(1:3) = [KnctDataTransf(1,j); KnctDataTransf(3,j); KnctDataTransf(2,j)];
         else
-            state_estimate(1:3) = KnctDataTransf(:,j);
-            state_estimate(4:6) = (KnctDataTransf(:,j) - KnctDataTransf(:,j-1))/(tKnct(j) - tKnct(j-1)); 
+            state_estimate(1:3) = [KnctDataTransf(1,j); KnctDataTransf(3,j); KnctDataTransf(2,j)];
+            velocity_estimate = (KnctDataTransf(:,j) - KnctDataTransf(:,j-1))/(tKnct(j) - tKnct(j-1));
+            state_estimate(4:6) = [velocity_estimate(1); velocity_estimate(3); velocity_estimate(2)];
         end
         j = min(size(KnctDataTransf,2),j + 1); 
     end
@@ -256,7 +257,7 @@ end
 
 figure;
 c = linspace(1,10,size(AccData,2)); 
-scatter(100*PredictData(1,:),100*PredictData(2,:),[],c)
+scatter(100*PredictData(1,:),100*PredictData(3,:),[],c)
 title('Sensor fusion for X-Z motion (Attempt 1)')
 xlabel('x position (cm)')
 ylabel('z position (cm)')

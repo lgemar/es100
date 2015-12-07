@@ -21,7 +21,7 @@ if(recompute_reg_points == 1)
 
     csvwrite([file_name, '_registration_points.csv'], reg_points); 
 else
-    reg_points = csvread([file_name, '_registration_points.csv'])
+    reg_points = csvread([file_name, '_registration_points.csv']);
 
     w0 = reg_points(:, 1)';
     w1 = reg_points(:, 2)';

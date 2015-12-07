@@ -1,7 +1,7 @@
 %% Variables of interest
 
 % Sample rates, frequencies, and periods
-N = 15; % Number of seconds for the acquisition
+N = 10; % Number of seconds for the acquisition
 Tfk = 2; % Number of Kinect samples per second
 Tfa = 300; % Number of accelerometer samples per second
 Tsk = 1/Tfk; % Period for Kinect samples
@@ -113,7 +113,6 @@ ylim([0 480])
 
 %% Visualize the raw accelerometer data
 AccVel = integrate3D(tAcc,AccData); 
-
 AccPos = integrate3D(tAcc,AccVel);
 
 figure; 
@@ -138,9 +137,46 @@ c = linspace(1,10,size(AccData,2));
 scatter(AccPos(1,:),AccPos(3,:),[], c)
 
 %% Transform the kinect data
+% Define the path of movement
+% Trigger the devices to start logging of data.
+trigger([colorVid depthVid]);
+% Retrieve the acquired data
+rgb_image = getdata(colorVid);
+imshow(rgb_image)
+[x,y] = ginput(10); 
+
+%% Hard code the transformation values
+% Compute the reference trajectory from the clicked points
+xtransform = 0.13 / (368 - 301); % m / pixels
+ztransform = 0.193 / (331 - 233); % m / pixels
+ytransform =  1 / 1000; % m / values
+ 
+xorigin = x(1); 
+zorigin = (640-y(1)); 
+
+trajectory = [x-xorigin,640-y-zorigin] .* repmat([xtransform;ztransform]',length(x),1);  
+KnctDataTransf = [KnctData(1,:)-xorigin;640-KnctData(2,:)-zorigin;KnctData(3,:)] .* repmat([xtransform;ztransform;ytransform],1,size(KnctData,2));
+
+%% Plot the x-z dimensions of the Kinect data
+c = linspace(1,10,size(KnctDataTransf,2));
+figure;
+hold on
+scatter(100*KnctDataTransf(1,:),100*KnctDataTransf(2,:),[],c)
+plot(100*(x-xorigin) * xtransform,100*(640-y-zorigin)*ztransform, 'r') % Plot the intended trajectory
+title('X-Z Motion')
+xlabel('x position (cm)')
+ylabel('z position (cm)')
+
+%% Compute the error of the Kinect values
+err = zeros(1,size(KnctDataTransf,2)); 
+for i = 1:size(KnctDataTransf,2)
+    P = KnctDataTransf(1:2,1)'; 
+    err(i) = spatialError(trajectory,P); 
+end
+mae = mean(err);
 
 %% Transform the accelerometer data
-window_size = 50;
+window_size = 1;
 acc_filter = ones(window_size,1) * 1/window_size; 
 AccFiltData = [];
 for i = 1:length(tAcc)
